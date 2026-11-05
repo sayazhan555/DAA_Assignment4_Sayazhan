@@ -1,17 +1,30 @@
 package com.sayazhan;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    static void main() {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        IO.println(String.format("Hello and welcome!"));
+import java.util.Arrays;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            IO.println("i = " + i);
-        }
+public class Main {
+
+    public static void main(String[] args) {
+
+        NaiveSearch naive = new NaiveSearch();
+        KMPSearch kmp = new KMPSearch();
+
+        String text = "ABABDABACDABABCABAB";
+        String pattern = "ABABCABAB";
+
+        System.out.println("Naive: " + naive.search(text, pattern));
+        System.out.println("KMP: " + kmp.search(text, pattern));
+
+        System.out.println("Naive comparisons: " + naive.getComparisons());
+        System.out.println("KMP comparisons: " + kmp.getComparisons());
+
+        System.out.println("LPS 1: "
+                + Arrays.toString(kmp.lps("AAACAAAA")));
+
+        System.out.println("LPS 2: "
+                + Arrays.toString(kmp.lps("ABABCABAB")));
+
+        System.out.println("Overlapping: "
+                + kmp.search("AAAAA", "AA"));
     }
 }
