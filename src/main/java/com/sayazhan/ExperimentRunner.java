@@ -1,14 +1,16 @@
+
 package com.sayazhan;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 public class ExperimentRunner {
 
     private static final int RUNS = 5;
+    private static final int WARMUP = 10;
     private static final InputGenerator generator = new InputGenerator();
 
     public static void main(String[] args) throws IOException {
@@ -23,6 +25,7 @@ public class ExperimentRunner {
         Files.writeString(Path.of("results/results.csv"), csv.toString());
 
         System.out.println("Results saved to results/results.csv");
+        System.out.println("All experiments completed.");
     }
 
     private static void runEditDistance(StringBuilder csv) {
@@ -39,15 +42,16 @@ public class ExperimentRunner {
                         ? generator.randomString(n)
                         : generator.repeatedString(n, 'b');
 
-                RecursiveEditDistance algorithm = new RecursiveEditDistance();
+                RecursiveEditDistance recursive = new RecursiveEditDistance();
+
+                for (int i = 0; i < WARMUP; i++) {
+                    recursive.distance(a, b);
+                }
 
                 for (int run = 1; run <= RUNS; run++) {
-                    long start = System.nanoTime();
-                    algorithm.distance(a, b);
-                    double ms = (System.nanoTime() - start) / 1_000_000.0;
-
+                    double ms = measure(() -> recursive.distance(a, b));
                     addRow(csv, "Recursive", input, n, run,
-                            ms, algorithm.getCalls());
+                            ms, recursive.getCalls());
                 }
             }
         }
@@ -65,20 +69,30 @@ public class ExperimentRunner {
                 TableEditDistance table = new TableEditDistance();
                 TwoRowsEditDistance twoRows = new TwoRowsEditDistance();
 
-                for (int run = 1; run <= RUNS; run++) {
-                    long start = System.nanoTime();
+                int tableAnswer = table.distance(a, b);
+                int twoRowsAnswer = twoRows.distance(a, b);
+
+                if (tableAnswer != twoRowsAnswer) {
+                    throw new IllegalStateException(
+                            "Edit Distance results do not match"
+                    );
+                }
+
+                for (int i = 0; i < WARMUP; i++) {
                     table.distance(a, b);
-                    double ms = (System.nanoTime() - start) / 1_000_000.0;
+                    twoRows.distance(a, b);
+                }
+
+                for (int run = 1; run <= RUNS; run++) {
+                    double tableMs = measure(() -> table.distance(a, b));
 
                     addRow(csv, "Table", input, n, run,
-                            ms, table.getOperations());
+                            tableMs, table.getOperations());
 
-                    start = System.nanoTime();
-                    twoRows.distance(a, b);
-                    ms = (System.nanoTime() - start) / 1_000_000.0;
+                    double twoRowsMs = measure(() -> twoRows.distance(a, b));
 
                     addRow(csv, "TwoRows", input, n, run,
-                            ms, twoRows.getOperations());
+                            twoRowsMs, twoRows.getOperations());
                 }
             }
         }
@@ -101,23 +115,52 @@ public class ExperimentRunner {
                 NaiveSearch naive = new NaiveSearch();
                 KMPSearch kmp = new KMPSearch();
 
-                for (int run = 1; run <= RUNS; run++) {
-                    long start = System.nanoTime();
+                List<Integer> naiveResult = naive.search(text, pattern);
+                List<Integer> kmpResult = kmp.search(text, pattern);
+
+                if (!naiveResult.equals(kmpResult)) {
+                    throw new IllegalStateException(
+                            "Naive and KMP results do not match"
+                    );
+                }
+
+                for (int i = 0; i < WARMUP; i++) {
                     naive.search(text, pattern);
-                    double ms = (System.nanoTime() - start) / 1_000_000.0;
+                    kmp.search(text, pattern);
+                }
+
+                for (int run = 1; run <= RUNS; run++) {
+                    double naiveMs = measure(
+                            () -> naive.search(text, pattern)
+                    );
 
                     addRow(csv, "Naive", input, n, run,
-                            ms, naive.getComparisons());
+                            naiveMs, naive.getComparisons());
 
-                    start = System.nanoTime();
-                    kmp.search(text, pattern);
-                    ms = (System.nanoTime() - start) / 1_000_000.0;
+                    double kmpMs = measure(
+                            () -> kmp.search(text, pattern)
+                    );
 
                     addRow(csv, "KMP", input, n, run,
-                            ms, kmp.getComparisons());
+                            kmpMs, kmp.getComparisons());
                 }
             }
         }
+    }
+
+    private static double measure(Runnable task) {
+        // Measure a batch to reduce timing noise.
+        int repetitions = 100;
+
+        long start = System.nanoTime();
+
+        for (int i = 0; i < repetitions; i++) {
+            task.run();
+        }
+
+        long end = System.nanoTime();
+
+        return (end - start) / 1_000_000.0 / repetitions;
     }
 
     private static void addRow(StringBuilder csv, String algorithm,
