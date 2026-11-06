@@ -15,7 +15,9 @@ Inputs:
   to show expensive recursive branching.
 
 Metrics:
-- Execution time in milliseconds (median of 5 runs).
+- Execution time in milliseconds. Each measurement is the
+  average of 100 executions after JVM warm-up.
+  The final value is the median of 5 measurements.
 - Recursive function calls.
 - DP cell updates.
 
@@ -39,7 +41,9 @@ Inputs:
   with 'b', to show the difficult case for Naive Search.
 
 Metrics:
-- Execution time in milliseconds (median of 5 runs).
+- Execution time in milliseconds. Each measurement is the
+  average of 100 executions after JVM warm-up.
+  The final value is the median of 5 measurements.
 - Character comparisons inside the algorithms.
 
 Prediction:
