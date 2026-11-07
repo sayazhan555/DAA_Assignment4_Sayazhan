@@ -69,14 +69,20 @@ public class ExperimentRunner {
                 TableEditDistance table = new TableEditDistance();
                 TwoRowsEditDistance twoRows = new TwoRowsEditDistance();
 
-                int tableAnswer = table.distance(a, b);
-                int twoRowsAnswer = twoRows.distance(a, b);
+                EditDistance[] algorithms = {table, twoRows};
+                String[] names = {"Table", "TwoRows"};
 
-                if (tableAnswer != twoRowsAnswer) {
-                    throw new IllegalStateException(
-                            "Edit Distance results do not match"
-                    );
+
+                int expected = algorithms[0].distance(a, b);
+
+                for (EditDistance algorithm : algorithms) {
+                    if (algorithm.distance(a, b) != expected) {
+                        throw new IllegalStateException(
+                                "Edit Distance results do not match"
+                        );
+                    }
                 }
+
 
                 for (int i = 0; i < WARMUP; i++) {
                     table.distance(a, b);
