@@ -2,7 +2,8 @@
 
 **Student:** Sayazhan Kanat  
 **Group:** SE-2517  
-
+**Course:** Design and Analysis of Algorithms  
+**Instructor:** Taubakabyl Nurlybek
 
 ## Project Description
 
