@@ -1,6 +1,7 @@
 package com.sayazhan;
 
-public class TableEditDistance {
+
+public class TableEditDistance implements EditDistance {
 
     private long operations;
 

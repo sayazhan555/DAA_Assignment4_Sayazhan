@@ -1,6 +1,6 @@
 package com.sayazhan;
 
-public class TwoRowsEditDistance {
+public class TwoRowsEditDistance implements EditDistance {
 
     private long operations;
 

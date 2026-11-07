@@ -1,6 +1,6 @@
 package com.sayazhan;
 
-public class RecursiveEditDistance {
+public class RecursiveEditDistance implements EditDistance {
 
     private long calls;
 
